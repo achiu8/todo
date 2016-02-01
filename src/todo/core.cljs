@@ -42,8 +42,8 @@
       (dom/li
        nil
        (dom/span #js {:style (item-display (:done item))} (:name item))
-       (dom/button #js {:onClick (fn [_] (put! done @item))} (if (:done item) "open" "done"))
-       (dom/button #js {:onClick (fn [_] (put! delete @item))} "delete")))))
+       (dom/button #js {:onClick #(put! done @item)} (if (:done item) "open" "done"))
+       (dom/button #js {:onClick #(put! delete @item)} "delete")))))
 
 (defn todo-list [data owner]
   (reify
