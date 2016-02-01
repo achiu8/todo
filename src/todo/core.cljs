@@ -35,6 +35,31 @@
   (let [active-left (filter (comp not :done) items)]
     (str (count active-left) " items left")))
 
+(defn filter-category [name owner]
+  (let [filter      (om/get-state owner :filter)
+        font-weight (when (= filter name) "bold")]
+    (dom/li
+     #js {:style #js {:display "inline" :margin-right "5px"}}
+     (dom/a
+      #js {:href    "#"
+           :style   #js {:color           "black"
+                         :text-decoration "none"
+                         :font-weight     font-weight}
+           :value   name
+           :onClick #(om/set-state! owner :filter (.. % -target -text))}
+      name))))
+
+(defn items-filter [owner]
+  (apply dom/ul
+         #js {:style #js {:list-style-type "none" :margin 0 :padding 0}}
+         (map #(filter-category % owner) ["all" "active" "done"])))
+
+(defn filtered-items [items category]
+  (condp = category
+   "active" (filter (comp not :done) items)
+   "done"   (filter :done items)
+   items))
+
 (defn todo-item [item owner]
   (reify
     om/IRenderState
@@ -51,7 +76,8 @@
     (init-state [_]
       {:delete (chan)
        :done   (chan)
-       :text   ""})
+       :text   ""
+       :filter "all"})
     om/IWillMount
     (will-mount [_]
       (let [delete (om/get-state owner :delete)
@@ -76,9 +102,12 @@
               :onChange #(handle-change % owner)
               :onKeyUp  #(handle-enter % data owner)}))
        (dom/p nil (items-left (:items data)))
+       (items-filter owner)
        (apply dom/ul
               nil
-              (om/build-all todo-item (:items data) {:init-state state}))))))
+              (om/build-all todo-item
+                            (filtered-items (:items data) (:filter state))
+                            {:init-state state}))))))
 
 (om/root
   todo-list
