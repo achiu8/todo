@@ -21,7 +21,7 @@
   (fn [items]
     (replace {item (assoc item :done (not (:done item)))} items)))
 
-(defn handle-change [e owner {:keys [text]}]
+(defn handle-change [e owner]
   (om/set-state! owner :text (.. e -target -value)))
 
 (defn handle-enter [e data owner]
@@ -73,7 +73,7 @@
          #js {:type     "text"
               :ref      "new-item"
               :value    (:text state)
-              :onChange #(handle-change % owner state)
+              :onChange #(handle-change % owner)
               :onKeyUp  #(handle-enter % data owner)}))
        (dom/p nil (items-left (:items data)))
        (apply dom/ul
