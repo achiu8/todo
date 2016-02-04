@@ -33,6 +33,13 @@
   (let [active-left (filter (comp not :done) items)]
     (str (count active-left) " items left")))
 
+(defn clear-button [data]
+  (let [done-items (filter :done (:items data))]
+    (dom/button
+     #js {:onClick #(doseq [item done-items]
+                      (om/transact! data :items (delete-item item)))}
+     (str "clear done (" (count done-items) ")"))))
+
 (defn filter-category [name owner]
   (let [filter      (om/get-state owner :filter)
         font-weight (when (= filter name) "bold")]
@@ -49,7 +56,9 @@
 
 (defn items-filter [owner]
   (apply dom/ul
-         #js {:style #js {:list-style-type "none" :margin 0 :padding 0}}
+         #js {:style #js {:list-style-type "none"
+                          :margin "10px 0 0 0"
+                          :padding 0}}
          (map #(filter-category % owner) ["all" "active" "done"])))
 
 (defn filtered-items [items category]
@@ -108,9 +117,10 @@
               :onChange #(handle-change % owner)
               :onKeyUp  #(handle-enter % data owner)}))
        (dom/p nil (items-left (:items data)))
+       (clear-button data)
        (items-filter owner)
        (apply dom/div
-              #js {:style #js {:margin-top "20px"}}
+              #js {:style #js {:margin-top "10px"}}
               (om/build-all todo-item
                             (filtered-items (:items data) (:filter state))
                             {:init-state state}))))))
