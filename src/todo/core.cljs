@@ -28,8 +28,6 @@
   (when (= (.-key e) "Enter")
     (add-item data owner)))
 
-(defn item-display [done]
-  (when done #js {:text-decoration "line-through"}))
 
 (defn items-left [items]
   (let [active-left (filter (comp not :done) items)]
@@ -70,7 +68,12 @@
         #js {:type "checkbox"
              :onClick #(put! done @item)
              :checked (:done item)})
-       (dom/span #js {:style (item-display (:done item))} (:name item))
+       (dom/span
+        #js {:style #js {:text-decoration (when (:done item) "line-through")
+                         :display         "inline-block"
+                         :width           "300px"
+                         :margin          "0 10px"}}
+        (:name item))
        (dom/button #js {:onClick #(put! delete @item)} "delete")))))
 
 (defn todo-list [data owner]
