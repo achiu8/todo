@@ -64,10 +64,13 @@
   (reify
     om/IRenderState
     (render-state [_ {:keys [delete done]}]
-      (dom/li
+      (dom/div
        nil
+       (dom/input
+        #js {:type "checkbox"
+             :onClick #(put! done @item)
+             :checked (:done item)})
        (dom/span #js {:style (item-display (:done item))} (:name item))
-       (dom/button #js {:onClick #(put! done @item)} (if (:done item) "open" "done"))
        (dom/button #js {:onClick #(put! delete @item)} "delete")))))
 
 (defn todo-list [data owner]
@@ -103,8 +106,8 @@
               :onKeyUp  #(handle-enter % data owner)}))
        (dom/p nil (items-left (:items data)))
        (items-filter owner)
-       (apply dom/ul
-              nil
+       (apply dom/div
+              #js {:style #js {:margin-top "20px"}}
               (om/build-all todo-item
                             (filtered-items (:items data) (:filter state))
                             {:init-state state}))))))
